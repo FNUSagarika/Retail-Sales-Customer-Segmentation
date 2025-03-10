@@ -1,8 +1,8 @@
-## 1. Load the Data into MySQL
+1. Load the Data into MySQL
 Create Tables
 Define tables in MySQL to store sales and customer data:
 
-** Sales Table
+1.1 Sales Table
 CREATE TABLE Sales (
     InvoiceNo VARCHAR(50),
     CustomerID INT,
@@ -13,7 +13,7 @@ CREATE TABLE Sales (
     ShoppingMall VARCHAR(100)
 );
 
-** Customers Table
+1.2 Customers Table
 CREATE TABLE Customers (
     CustomerID INT PRIMARY KEY,
     Gender VARCHAR(10),
@@ -21,3 +21,71 @@ CREATE TABLE Customers (
     PaymentMethod VARCHAR(50)
 );
 
+2. Build the ETL Pipeline
+
+2.1 Extract
+Combine data from the Sales and Customers tables:
+
+SELECT 
+    s.InvoiceNo, 
+    s.Category, 
+    s.Quantity, 
+    s.Price, 
+    s.InvoiceDate, 
+    s.ShoppingMall, 
+    c.Gender, 
+    c.Age, 
+    c.PaymentMethod
+FROM Sales s
+LEFT JOIN Customers c ON s.CustomerID = c.CustomerID;
+
+
+2.2 Transform
+
+2.2.1 Calculate Total Sales by Category and Shopping Mall:
+SELECT 
+    Category, 
+    ShoppingMall, 
+    SUM(Quantity * Price) AS TotalSales
+FROM Sales
+GROUP BY Category, ShoppingMall;
+
+2.2.2 Customer Segmentation by Gender and Age Group:
+SELECT 
+    Gender, 
+    CASE 
+        WHEN Age < 25 THEN 'Youth'
+        WHEN Age BETWEEN 25 AND 45 THEN 'Adult'
+        ELSE 'Senior'
+    END AS AgeGroup,
+    COUNT(DISTINCT CustomerID) AS CustomerCount
+FROM Customers
+GROUP BY Gender, AgeGroup;
+
+2.2.3 Average Purchase Value by Payment Method:
+SELECT 
+    PaymentMethod, 
+    AVG(Quantity * Price) AS AvgPurchaseValue
+FROM Sales s
+JOIN Customers c ON s.CustomerID = c.CustomerID
+GROUP BY PaymentMethod;
+
+
+2.3 Load
+
+Store the transformed results in summary tables for reporting:
+Sales Summary Table: 
+
+CREATE TABLE SalesSummary (
+    Category VARCHAR(100),
+    ShoppingMall VARCHAR(100),
+    TotalSales DECIMAL(10, 2)
+);
+
+INSERT INTO SalesSummary (Category, ShoppingMall, TotalSales)
+SELECT 
+    Category, 
+    ShoppingMall, 
+    SUM(Quantity * Price)
+FROM Sales
+GROUP BY Category, ShoppingMall;
