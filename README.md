@@ -11,26 +11,3 @@ Total sales by category and shopping mall.
 Customer segmentation by gender, age, and payment method.
 Average purchase value by customer demographic.
 
-
-## 1. Load the Data into MySQL
-Create Tables
-Define tables in MySQL to store sales and customer data:
-
-** Sales Table
-CREATE TABLE Sales (
-    InvoiceNo VARCHAR(50),
-    CustomerID INT,
-    Category VARCHAR(100),
-    Quantity INT,
-    Price DECIMAL(10, 2),
-    InvoiceDate DATE,
-    ShoppingMall VARCHAR(100)
-);
-
-** Customers Table
-CREATE TABLE Customers (
-    CustomerID INT PRIMARY KEY,
-    Gender VARCHAR(10),
-    Age INT,
-    PaymentMethod VARCHAR(50)
-);
